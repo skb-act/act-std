@@ -76,10 +76,32 @@
     </style>
 </head>
 
-<body class="flex min-h-screen">
+<body class="flex min-h-screen flex-col lg:flex-row">
 
-    <aside class="w-72 sidebar-grad shadow-2xl hidden lg:flex flex-col sticky top-0 h-screen">
-        <div class="p-8 text-center">
+    <!-- Mobile Header -->
+    <div class="lg:hidden flex items-center justify-between bg-white/90 backdrop-blur-xl p-4 sticky top-0 z-40 shadow-sm border-b border-purple-100">
+        <div class="flex items-center gap-3">
+            <img src="https://lh3.googleusercontent.com/d/1ZM965vwAK5KhROB1Q7ZwTHxAwiwFjSxV" alt="Logo" class="w-10 h-10 drop-shadow-md rounded-xl">
+            <div>
+                <h1 class="text-sm font-bold text-purple-900 leading-tight">ชลบุรี "สุขบท"</h1>
+                <p class="text-[9px] text-purple-500 font-medium tracking-wider">เปิดกิจกรรมชุมนุม</p>
+            </div>
+        </div>
+        <button onclick="toggleMobileMenu()" class="text-purple-700 p-2 bg-white rounded-xl shadow-sm border border-purple-100">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+        </button>
+    </div>
+
+    <!-- Sidebar Overlay for mobile -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-purple-900/40 backdrop-blur-sm z-40 hidden lg:hidden" onclick="toggleMobileMenu()"></div>
+
+    <aside id="sidebar" class="w-72 sidebar-grad shadow-2xl flex flex-col fixed lg:sticky inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 top-0 h-[100dvh] lg:h-screen z-50 transition-transform duration-300 ease-in-out flex-shrink-0 overflow-y-auto">
+        <div class="lg:hidden absolute top-4 right-4">
+            <button onclick="toggleMobileMenu()" class="text-purple-700 p-2 bg-white/50 rounded-full">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <div class="p-8 text-center mt-4 lg:mt-0">
             <img src="https://lh3.googleusercontent.com/d/1ZM965vwAK5KhROB1Q7ZwTHxAwiwFjSxV" alt="Logo"
                 class="w-28 h-28 mx-auto mb-4 drop-shadow-2xl rounded-3xl border-4 border-white rotate-3 hover:rotate-0 transition-transform duration-500">
 
@@ -297,6 +319,19 @@
         // *** ตั้งค่า URL ของคุณที่นี่ ***
         const scriptURL = 'https://script.google.com/macros/s/AKfycbyS0ui0YWOVJGffMF-AGexdtPxvf9xUIs9KleWCLwJceJmanJbzmGSyCaOwwwwEWhZ9/exec';
 
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
         function showPage(pageId, btn) {
             document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
@@ -305,6 +340,14 @@
 
             if (pageId === 'list-page' || pageId === 'dash-page') fetchData();
             if (pageId === 'form-page') updateCurrentCode();
+            
+            // Auto close mobile menu if open
+            if (window.innerWidth < 1024) {
+                const sidebar = document.getElementById('sidebar');
+                if (sidebar && !sidebar.classList.contains('-translate-x-full')) {
+                    toggleMobileMenu();
+                }
+            }
         }
 
         function updateCurrentCode() {

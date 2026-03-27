@@ -1,962 +1,480 @@
 <!doctype html>
 <html lang="th">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ทะเบียนสมาชิกชุมนุม</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ทะเบียนสมาชิกชุมนุม</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 10mm;
+        }
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: #f3f4f6;
+            margin: 0;
+            padding: 20px;
+        }
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        .page-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
 
-  <style>
-    @page {
-      size: A4 portrait;
-      margin: 10mm;
-    }
+        .a4-page {
+            width: 210mm;
+            height: 297mm;
+            background: white;
+            padding: 10mm 15mm;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
 
-    :root {
-      --pink-bg: #fff1f5;
-      --pink-panel: #ffffff;
-      --pink-soft: #fdf2f8;
-      --pink-border: #fbcfe8;
-      --pink-main: #f472b6;
-      --pink-main-dark: #ec4899;
-      --pink-main-darker: #db2777;
-      --pink-preview: #fce7f3;
-      --text-main: #374151;
-    }
+        .page-break {
+            page-break-before: always;
+        }
 
-    * {
-      box-sizing: border-box;
-    }
+        .line-input {
+            border: none;
+            border-bottom: 1px dotted #999;
+            background: transparent;
+            outline: none;
+            font-family: inherit;
+            color: #000;
+            text-align: center;
+        }
 
-    body {
-      font-family: "Kanit", sans-serif;
-      background: var(--pink-bg);
-      color: var(--text-main);
-      margin: 0;
-    }
+        .line-input:focus {
+            border-bottom-color: #000;
+            border-bottom-style: solid;
+        }
 
-    .document-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+        .photo-box {
+            width: 3cm;
+            height: 4cm;
+            border: 1px solid #111827;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f9fafb;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+            margin: 0 auto;
+        }
 
-    .a4-page {
-      width: 210mm;
-      min-height: 297mm;
-      background: white;
-      margin: 0 auto;
-      padding: 10mm;
-      box-sizing: border-box;
-      position: relative;
-    }
+        .photo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
-    .page-break {
-      page-break-after: always;
-      break-after: page;
-    }
+        .photo-placeholder {
+            font-size: 10px;
+            color: #6b7280;
+            text-align: center;
+            line-height: 1.2;
+        }
 
-    .photo-box {
-      width: 3cm;
-      height: 4cm;
-      border: 1px solid #111827;
-      overflow: hidden;
-      background: #f9fafb;
-      position: relative;
-      margin: 0 auto;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 4px;
-    }
+        .person-card {
+            width: 3.4cm;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-    .photo-box img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
+        .info-input {
+            width: 100%;
+            border: 1px dashed transparent;
+            text-align: center;
+            font-size: 11px;
+            line-height: 1.2;
+            margin-top: 2px;
+            padding: 2px 0;
+        }
 
-    .photo-placeholder {
-      font-size: 10px;
-      color: #6b7280;
-      text-align: center;
-      line-height: 1.2;
-      padding: 4px;
-    }
+        .info-input:hover {
+            border-color: #e5e7eb;
+        }
 
-    .person-card {
-      width: 3.55cm;
-      text-align: center;
-    }
+        .info-input:focus {
+            border-color: #9ca3af;
+            outline: none;
+        }
 
-    .person-text {
-      margin-top: 4px;
-      line-height: 1.14;
-    }
+        .v-line {
+            width: 1px;
+            background: #000;
+            margin: 0 auto;
+        }
 
-    .person-name {
-      font-size: 10px;
-      font-weight: 600;
-      min-height: 14px;
-      max-height: 28px;
-      overflow: hidden;
-      word-break: break-word;
-    }
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
 
-    .person-nickname,
-    .person-role,
-    .person-phone,
-    .person-student-id,
-    .person-class {
-      font-size: 8.5px;
-      min-height: 11px;
-      max-height: 22px;
-      overflow: hidden;
-      word-break: break-word;
-    }
+            .page-container {
+                gap: 0;
+            }
 
-    .connector {
-      width: 1px;
-      background: #111827;
-      margin: 0 auto;
-    }
+            .a4-page {
+                box-shadow: none;
+                margin: 0;
+                height: 297mm;
+                overflow: hidden;
+            }
 
-    .logo-head {
-      width: 24mm;
-      height: 24mm;
-      object-fit: contain;
-      margin: 0 auto 1.5mm auto;
-      display: block;
-    }
+            .no-print {
+                display: none !important;
+            }
 
-    .members-grid-5 {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      column-gap: 3mm;
-      row-gap: 6mm;
-      justify-items: center;
-      padding-left: 2mm;
-      padding-right: 2mm;
-    }
+            .info-input {
+                border-color: transparent !important;
+            }
 
-    .sub-page-title {
-      text-align: center;
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 2mm;
-    }
+            .line-input {
+                border-bottom-color: transparent !important;
+            }
 
-    .sub-page-subtitle {
-      text-align: center;
-      font-size: 12px;
-      margin-bottom: 5mm;
-    }
-
-    .no-print {
-      display: block;
-    }
-
-    .app-shell {
-      min-height: 100vh;
-      display: flex;
-    }
-
-    .sidebar {
-      width: 500px;
-      min-width: 500px;
-      max-width: 500px;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      background: var(--pink-bg);
-      border-right: 1px solid var(--pink-border);
-    }
-
-    .sidebar-header {
-      padding: 16px;
-      border-bottom: 1px solid var(--pink-border);
-      background: white;
-      position: sticky;
-      top: 0;
-      z-index: 5;
-    }
-
-    .sidebar-title {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--pink-main-dark);
-      margin: 0;
-    }
-
-    .sidebar-subtitle {
-      font-size: 13px;
-      color: #6b7280;
-      margin-top: 4px;
-    }
-
-    .sidebar-scroll {
-      flex: 1;
-      overflow-y: auto;
-      padding: 16px;
-      padding-bottom: 28px;
-    }
-
-    .panel {
-      background: var(--pink-panel);
-      border: 1px solid var(--pink-border);
-      border-radius: 20px;
-      padding: 16px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 6px rgba(236, 72, 153, 0.05);
-    }
-
-    .panel-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--pink-main-dark);
-      margin-bottom: 12px;
-    }
-
-    .label-text {
-      display: block;
-      font-size: 14px;
-      font-weight: 500;
-      margin-bottom: 6px;
-    }
-
-    .soft-input,
-    .soft-select {
-      width: 100%;
-      border: 1px solid var(--pink-border);
-      border-radius: 14px;
-      padding: 10px 12px;
-      font-family: inherit;
-      font-size: 14px;
-      outline: none;
-      background: white;
-      transition: 0.2s ease;
-    }
-
-    .soft-input:focus,
-    .soft-select:focus {
-      border-color: var(--pink-main);
-      box-shadow: 0 0 0 3px rgba(244, 114, 182, 0.18);
-    }
-
-    .soft-input.readonly {
-      background: #f9fafb;
-    }
-
-    .btn {
-      border: none;
-      border-radius: 14px;
-      padding: 10px 14px;
-      font-family: inherit;
-      font-size: 14px;
-      cursor: pointer;
-      transition: 0.2s ease;
-      font-weight: 500;
-    }
-
-    .btn-main {
-      background: var(--pink-main);
-      color: white;
-    }
-
-    .btn-main:hover {
-      background: var(--pink-main-dark);
-    }
-
-    .btn-alt {
-      background: #f9a8d4;
-      color: white;
-    }
-
-    .btn-alt:hover {
-      background: var(--pink-main);
-    }
-
-    .btn-dark {
-      background: #6b7280;
-      color: white;
-    }
-
-    .btn-dark:hover {
-      background: #4b5563;
-    }
-
-    .btn-danger {
-      background: #fb7185;
-      color: white;
-    }
-
-    .btn-danger:hover {
-      background: #f43f5e;
-    }
-
-    .preview-wrap {
-      flex: 1;
-      padding: 16px 20px;
-      overflow: auto;
-    }
-
-    .preview-surface {
-      background: var(--pink-preview);
-      border-radius: 20px;
-      padding: 12px;
-      min-height: calc(100vh - 32px);
-    }
-
-    .form-card {
-      border: 1px solid var(--pink-border);
-      border-radius: 18px;
-      padding: 12px;
-      background: #fff;
-    }
-
-    .scrollbar-pink::-webkit-scrollbar {
-      width: 10px;
-      height: 10px;
-    }
-
-    .scrollbar-pink::-webkit-scrollbar-thumb {
-      background: #f9a8d4;
-      border-radius: 999px;
-      border: 2px solid #fff1f5;
-    }
-
-    .scrollbar-pink::-webkit-scrollbar-track {
-      background: #ffe4e6;
-      border-radius: 999px;
-    }
-
-    .menu-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 8px;
-    }
-
-    .teacher-form-list,
-    .member-form-list {
-      display: grid;
-      gap: 14px;
-    }
-
-    .section-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .hint {
-      font-size: 12px;
-      color: #6b7280;
-    }
-
-    @media (max-width: 1280px) {
-      .sidebar {
-        width: 430px;
-        min-width: 430px;
-        max-width: 430px;
-      }
-    }
-
-    @media (max-width: 1024px) {
-      .app-shell {
-        flex-direction: column;
-      }
-
-      .sidebar {
-        width: 100%;
-        min-width: 100%;
-        max-width: 100%;
-        height: auto;
-        border-right: none;
-        border-bottom: 1px solid var(--pink-border);
-      }
-
-      .sidebar-scroll {
-        max-height: none;
-      }
-
-      .preview-wrap {
-        padding: 12px;
-      }
-    }
-
-    @media print {
-      body {
-        background: white !important;
-      }
-
-      .no-print {
-        display: none !important;
-      }
-
-      .document-stack {
-        gap: 0 !important;
-      }
-
-      .a4-page {
-        width: 210mm !important;
-        min-height: 297mm !important;
-        margin: 0 !important;
-        padding: 10mm !important;
-        box-shadow: none !important;
-      }
-    }
-  </style>
+            .line-input[value=""] {
+                border-bottom-color: black !important;
+                border-bottom-style: dotted !important;
+            }
+        }
+    </style>
 </head>
+
 <body>
-  <div class="app-shell">
-    <!-- Sidebar -->
-    <aside class="sidebar no-print">
-      <div class="sidebar-header">
-        <h1 class="sidebar-title">ทะเบียนสมาชิกชุมนุม</h1>
-        <div class="sidebar-subtitle">กรอกข้อมูลด้านซ้าย แล้วดูตัวอย่างเอกสาร A4 ด้านขวา</div>
-      </div>
 
-      <div class="sidebar-scroll scrollbar-pink">
-        <div class="panel">
-          <div class="panel-title">ข้อมูลชุมนุม</div>
+    <div class="fixed bottom-5 right-5 flex gap-2 no-print z-50">
+        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold shadow-lg hover:bg-blue-700"
+            onclick="addMembersRow()">+ เพิ่มแถวสมาชิก (5 คน)</button>
+        <button class="bg-emerald-500 text-white px-4 py-2 rounded-lg font-bold shadow-lg hover:bg-emerald-600"
+            onclick="exportPNG()">บันทึกเป็น PNG</button>
+    </div>
 
-          <div class="mb-3">
-            <label class="label-text">ชื่อชุมนุม</label>
-            <input id="clubNameInput" type="text" class="soft-input" placeholder="เช่น ชุมนุมคอมพิวเตอร์">
-          </div>
+    <div class="page-container" id="documentData">
 
-          <div>
-            <label class="label-text">สถานที่จัดชุมนุม</label>
-            <input id="clubLocationInput" type="text" class="soft-input" placeholder="เช่น ห้อง 736">
-          </div>
-        </div>
+        <!-- Page 1 -->
+        <div class="a4-page" id="page-1">
 
-        <div class="panel">
-          <div class="panel-title">เมนู</div>
-          <div class="menu-grid">
-            <button id="resetBtn" type="button" class="btn btn-dark">1. ล้างข้อมูลทั้งหมด</button>
-            <button id="printBtn" type="button" class="btn btn-main">2. พิมพ์ PDF</button>
-            <button id="exportPngBtn" type="button" class="btn btn-alt">3. Export PNG</button>
-          </div>
-        </div>
+            <!-- Header Section -->
+            <div class="text-center mb-6 relative">
+                <label class="block cursor-pointer mx-auto" style="width: 25mm; height: 25mm;"
+                    title="คลิกเพื่อเปลี่ยนโลโก้">
+                    <img id="logoImg" src="https://lh3.googleusercontent.com/d/14o04HLIZFf1AmHejQLXC7lZYuszrrsvR"
+                        alt="Logo" class="w-full h-full object-contain">
+                    <input type="file" accept="image/*" class="hidden" onchange="uploadImage(event, 'logoImg')">
+                </label>
+                <div class="text-[18px] font-bold mt-2">ทะเบียนนักเรียนในชุมนุม ปีการศึกษา 1/2569</div>
 
-        <div class="panel">
-          <div class="section-top">
-            <div>
-              <div class="panel-title mb-0">ครูที่ปรึกษา 3 คน</div>
-              <div class="hint">ใส่ชื่อเล่นและเบอร์โทรได้</div>
+                <div class="flex justify-center items-center gap-2 mt-2 text-[14px]">
+                    <span>รหัสชุมนุม</span>
+                    <input type="text" class="line-input w-24">
+                    <span class="ml-4">ชื่อชุมนุม</span>
+                    <input type="text" id="clubNameInput" class="line-input w-48">
+                </div>
+                <div class="flex justify-center items-center gap-2 mt-1 text-[14px]">
+                    <span>สถานที่จัดชุมนุม</span>
+                    <input type="text" class="line-input w-36">
+                    <span class="ml-4">จำนวนนักเรียนในชุมนุม</span>
+                    <input type="text" class="line-input w-16 text-center">
+                    <span>คน</span>
+                </div>
             </div>
-          </div>
-          <div id="teachersForm" class="teacher-form-list"></div>
-        </div>
 
-        <div class="panel">
-          <div class="panel-title">ประธานชุมนุม</div>
-          <div id="presidentForm"></div>
-        </div>
+            <!-- Teachers -->
+            <div class="flex justify-center gap-6 relative">
+                <!-- Teacher 1 -->
+                <div class="person-card">
+                    <label class="photo-box">
+                        <div class="photo-placeholder" id="t1-div">อัปโหลดรูป<br>3x4 cm</div>
+                        <img id="t1-img" class="hidden" src="">
+                        <input type="file" accept="image/*" capture="environment" class="hidden"
+                            onchange="uploadPhoto(event, 't1')">
+                    </label>
+                    <div class="mt-1 font-semibold text-[13px] text-gray-800">ครูที่ปรึกษา</div>
+                    <input type="text" class="info-input font-bold" placeholder="ชื่อ-นามสกุล">
+                    <input type="text" class="info-input" placeholder="เบอร์โทรศัพท์">
+                </div>
+                <!-- Teacher 2 -->
+                <div class="person-card relative">
+                    <label class="photo-box">
+                        <div class="photo-placeholder" id="t2-div">อัปโหลดรูป<br>3x4 cm</div>
+                        <img id="t2-img" class="hidden" src="">
+                        <input type="file" accept="image/*" capture="environment" class="hidden"
+                            onchange="uploadPhoto(event, 't2')">
+                    </label>
+                    <div class="mt-1 font-semibold text-[13px] text-gray-800">ครูที่ปรึกษา</div>
+                    <input type="text" class="info-input font-bold" placeholder="ชื่อ-นามสกุล">
+                    <input type="text" class="info-input" placeholder="เบอร์โทรศัพท์">
 
-        <div class="panel">
-          <div class="panel-title">รองประธานชุมนุม</div>
-          <div id="vicePresidentForm"></div>
-        </div>
-
-        <div class="panel">
-          <div class="section-top">
-            <div>
-              <div class="panel-title mb-0">สมาชิก</div>
-              <div class="hint">แสดงผลหน้า A4 แบบแถวละ 5 คน</div>
+                    <!-- Center line down to President -->
+                    <div class="v-line absolute left-1/2 -bottom-[24px] transform -translate-x-1/2 h-[24px]"></div>
+                </div>
+                <!-- Teacher 3 -->
+                <div class="person-card">
+                    <label class="photo-box">
+                        <div class="photo-placeholder" id="t3-div">อัปโหลดรูป<br>3x4 cm</div>
+                        <img id="t3-img" class="hidden" src="">
+                        <input type="file" accept="image/*" capture="environment" class="hidden"
+                            onchange="uploadPhoto(event, 't3')">
+                    </label>
+                    <div class="mt-1 font-semibold text-[13px] text-gray-800">ครูที่ปรึกษา</div>
+                    <input type="text" class="info-input font-bold" placeholder="ชื่อ-นามสกุล">
+                    <input type="text" class="info-input" placeholder="เบอร์โทรศัพท์">
+                </div>
             </div>
-            <button id="addMemberBtn" type="button" class="btn btn-main">+ เพิ่มสมาชิก</button>
-          </div>
-          <div id="membersForm" class="member-form-list"></div>
+
+            <div class="v-line h-[24px]"></div> <!-- Connects from teacher spacing down to president -->
+
+            <!-- President -->
+            <div class="flex justify-center relative">
+                <div class="person-card relative">
+                    <label class="photo-box">
+                        <div class="photo-placeholder" id="p1-div">อัปโหลดรูป<br>3x4 cm</div>
+                        <img id="p1-img" class="hidden" src="">
+                        <input type="file" accept="image/*" capture="environment" class="hidden"
+                            onchange="uploadPhoto(event, 'p1')">
+                    </label>
+                    <div class="mt-1 font-semibold text-[13px] text-red-600">ประธานชุมนุม</div>
+                    <input type="text" class="info-input font-bold" placeholder="ชื่อ-นามสกุล">
+                    <div class="flex gap-0 w-full">
+                        <input type="text" class="info-input flex-1" placeholder="รหัสนักเรียน">
+                        <input type="text" class="info-input w-10 text-center" placeholder="ห้อง">
+                    </div>
+
+                    <!-- Line down from President -->
+                    <div class="v-line absolute left-1/2 -bottom-[20px] transform -translate-x-1/2 h-[20px]"></div>
+                </div>
+            </div>
+
+            <div class="v-line h-[20px]"></div> <!-- connects president spacing -->
+
+            <!-- Vice President -->
+            <div class="flex justify-center relative">
+                <div class="person-card relative">
+                    <label class="photo-box">
+                        <div class="photo-placeholder" id="vp1-div">อัปโหลดรูป<br>3x4 cm</div>
+                        <img id="vp1-img" class="hidden" src="">
+                        <input type="file" accept="image/*" capture="environment" class="hidden"
+                            onchange="uploadPhoto(event, 'vp1')">
+                    </label>
+                    <div class="mt-1 font-semibold text-[13px] text-orange-600">รองประธานชุมนุม</div>
+                    <input type="text" class="info-input font-bold" placeholder="ชื่อ-นามสกุล">
+                    <div class="flex gap-0 w-full">
+                        <input type="text" class="info-input flex-1" placeholder="รหัสนักเรียน">
+                        <input type="text" class="info-input w-10 text-center" placeholder="ห้อง">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Branching to members -->
+            <div class="relative w-full h-[24px] mt-1">
+                <div class="v-line absolute bottom-full left-1/2 h-[12px] transform -translate-x-1/2"></div>
+                <!-- Line from VP -->
+
+                <div class="absolute top-[12px] left-[10%] right-[10%] h-[1px] bg-black"></div>
+
+                <div class="absolute top-[12px] left-[10%] w-[1px] h-[12px] bg-black"></div>
+                <div class="absolute top-[12px] left-[30%] w-[1px] h-[12px] bg-black"></div>
+                <div class="absolute top-[12px] left-[50%] w-[1px] h-[12px] bg-black"></div>
+                <div class="absolute top-[12px] left-[70%] w-[1px] h-[12px] bg-black"></div>
+                <div class="absolute top-[12px] left-[90%] w-[1px] h-[12px] bg-black"></div>
+            </div>
+
+            <!-- Members Grid Page 1 -->
+            <div id="membersContainer-1" class="grid grid-cols-5 gap-0 w-full">
+                <!-- Members will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let memberCount = 0;
+        let rowCount = 0;
+
+        async function exportPNG() {
+            const pages = document.querySelectorAll('.a4-page');
+            for (let i = 0; i < pages.length; i++) {
+                const element = pages[i];
+                const originalBoxShadow = element.style.boxShadow;
+                element.style.boxShadow = 'none';
+
+                try {
+                    const canvas = await html2canvas(element, {
+                        scale: 2,
+                        useCORS: true,
+                        backgroundColor: '#ffffff',
+                        ignoreElements: (node) => {
+                            return node.classList && node.classList.contains('no-print');
+                        }
+                    });
+
+                    const link = document.createElement('a');
+                    link.download = `ทะเบียนสมาชิกชุมนุม_หน้า_${i + 1}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                } catch (err) {
+                    console.error('Error exporting PNG:', err);
+                } finally {
+                    element.style.boxShadow = originalBoxShadow;
+                }
+
+                // Delay to avoid browser blocking multiple downloads
+                await new Promise(r => setTimeout(r, 400));
+            }
+        }
+
+        function uploadImage(event, imgId) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById(imgId).src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function uploadPhoto(event, prefix) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById(prefix + '-img').src = e.target.result;
+                    document.getElementById(prefix + '-img').classList.remove('hidden');
+                    document.getElementById(prefix + '-div').classList.add('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function createNewPage(pageNum) {
+            const container = document.getElementById('documentData');
+            const clubName = document.getElementById('clubNameInput').value || '...';
+
+            // Create new full A4 page div
+            const html = `
+      <div class="a4-page page-break" id="page-${pageNum}">
+        <div class="text-center mb-6">
+          <div class="text-[16px] font-bold mt-4">ทะเบียนนักเรียนในชุมนุม ${clubName} (ส่วนต่อ หน้า ${pageNum})</div>
+        </div>
+        
+        <div id="membersContainer-${pageNum}" class="grid grid-cols-5 gap-0 w-full relative">
         </div>
       </div>
-    </aside>
-
-    <!-- Preview -->
-    <main class="preview-wrap">
-      <div class="preview-surface">
-        <div id="printArea" class="document-stack"></div>
-      </div>
-    </main>
-  </div>
-
-  <script>
-    const SCHOOL_LOGO_SRC = 'https://lh3.googleusercontent.com/d/14o04HLIZFf1AmHejQLXC7lZYuszrrsvR';
-
-    const MEMBERS_PER_ROW = 5;
-    const FIRST_PAGE_MEMBER_LIMIT = 10;
-    const NEXT_PAGE_MEMBER_LIMIT = 20;
-
-    function uid() {
-      return 'id-' + Math.random().toString(36).slice(2, 11);
-    }
-
-    function chunkArray(arr, size) {
-      const result = [];
-      for (let i = 0; i < arr.length; i += size) {
-        result.push(arr.slice(i, i + size));
-      }
-      return result;
-    }
-
-    function buildClassOptions(selectedValue = '') {
-      let html = '<option value="">เลือกระดับชั้น / ห้อง</option>';
-
-      for (let level = 1; level <= 3; level++) {
-        for (let room = 1; room <= 15; room++) {
-          const value = `ม.${level}/${room}`;
-          html += `<option value="${value}" ${selectedValue === value ? 'selected' : ''}>${value}</option>`;
+    `;
+            container.insertAdjacentHTML('beforeend', html);
         }
-      }
 
-      for (let level = 4; level <= 6; level++) {
-        for (let room = 1; room <= 11; room++) {
-          const value = `ม.${level}/${room}`;
-          html += `<option value="${value}" ${selectedValue === value ? 'selected' : ''}>${value}</option>`;
-        }
-      }
+        function addMembersRow() {
+            rowCount++;
 
-      return html;
-    }
+            let targetPageId = '';
+            let rowsOnThisPage = 0;
 
-    const state = {
-      clubName: '',
-      clubLocation: '',
-      teachers: [
-        { id: uid(), name: '', nickname: '', phone: '', role: 'ครูที่ปรึกษา', photo: '' },
-        { id: uid(), name: '', nickname: '', phone: '', role: 'ครูที่ปรึกษา', photo: '' },
-        { id: uid(), name: '', nickname: '', phone: '', role: 'ครูที่ปรึกษา', photo: '' },
-      ],
-      president: { id: uid(), studentId: '', name: '', nickname: '', classRoom: '', role: 'ประธานชุมนุม', photo: '' },
-      vicePresident: { id: uid(), studentId: '', name: '', nickname: '', classRoom: '', role: 'รองประธานชุมนุม', photo: '' },
-      members: Array.from({ length: 10 }, () => ({
-        id: uid(),
-        studentId: '',
-        name: '',
-        nickname: '',
-        classRoom: '',
-        role: 'สมาชิก',
-        photo: '',
-      })),
-    };
+            // Page 1 holds max 2 rows of members
+            if (rowCount <= 2) {
+                targetPageId = 'membersContainer-1';
+                rowsOnThisPage = rowCount;
+            } else {
+                // Page 2+ hold max 5 rows of members each
+                const excessRows = rowCount - 2;
+                const pageNum = Math.ceil(excessRows / 5) + 1;
+                targetPageId = `membersContainer-${pageNum}`;
+                rowsOnThisPage = excessRows % 5 === 1 ? 1 : excessRows % 5;
+                if (rowsOnThisPage === 0) rowsOnThisPage = 5;
 
-    function escapeHtml(text) {
-      return String(text || '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-    }
+                if (!document.getElementById(`page-${pageNum}`)) {
+                    createNewPage(pageNum);
+                }
+            }
 
-    function findPersonById(personId) {
-      for (const teacher of state.teachers) {
-        if (teacher.id === personId) return teacher;
-      }
-      if (state.president.id === personId) return state.president;
-      if (state.vicePresident.id === personId) return state.vicePresident;
-      for (const member of state.members) {
-        if (member.id === personId) return member;
-      }
-      return null;
-    }
+            const container = document.getElementById(targetPageId);
 
-    function createPersonCard(person) {
-      const photoHtml = person.photo
-        ? `<img src="${person.photo}" alt="${escapeHtml(person.name)}">`
-        : `<div class="photo-placeholder">คลิกเลือกรูป<br>หรือถ่ายภาพ</div>`;
+            // Only add branch lines for the subsequent rows WITHIN the same page
+            if (rowsOnThisPage > 1) {
+                const branchHTML = `
+          <div class="col-span-5 relative w-full h-[36px] mt-2">
+            <div class="absolute top-[20px] left-[10%] right-[10%] h-[1px] bg-black"></div>
+            
+            <div class="absolute top-[20px] left-[10%] w-[1px] h-[16px] bg-black"></div>
+            <div class="absolute top-[20px] left-[30%] w-[1px] h-[16px] bg-black"></div>
+            <div class="absolute top-[20px] left-[50%] w-[1px] h-[16px] bg-black"></div>
+            <div class="absolute top-[20px] left-[70%] w-[1px] h-[16px] bg-black"></div>
+            <div class="absolute top-[20px] left-[90%] w-[1px] h-[16px] bg-black"></div>
+          </div>
+       `;
+                container.insertAdjacentHTML('beforeend', branchHTML);
+            }
 
-      const phoneLine = person.phone ? `<div class="person-phone">${escapeHtml(person.phone)}</div>` : '';
-      const studentIdLine = person.studentId ? `<div class="person-student-id">รหัส ${escapeHtml(person.studentId)}</div>` : '';
-      const classLine = person.classRoom ? `<div class="person-class">${escapeHtml(person.classRoom)}</div>` : '';
+            // Wait, if it's the FIRST row on a NEXT page, we might want a branch down from nowhere
+            if (rowsOnThisPage === 1 && targetPageId !== 'membersContainer-1') {
+                const branchHTML = `
+          <div class="col-span-5 relative w-full h-[36px] mt-2">
+            <div class="v-line absolute bottom-full left-1/2 h-[30px] transform -translate-x-1/2 z-0"></div> 
+            <div class="absolute top-[20px] left-[10%] right-[10%] h-[1px] bg-black"></div>
+            
+            <div class="absolute top-[20px] left-[10%] w-[1px] h-[16px] bg-black"></div>
+            <div class="absolute top-[20px] left-[30%] w-[1px] h-[16px] bg-black"></div>
+            <div class="absolute top-[20px] left-[50%] w-[1px] h-[16px] bg-black"></div>
+            <div class="absolute top-[20px] left-[70%] w-[1px] h-[16px] bg-black"></div>
+            <div class="absolute top-[20px] left-[90%] w-[1px] h-[16px] bg-black"></div>
+          </div>
+       `;
+                container.insertAdjacentHTML('beforeend', branchHTML);
+            }
 
-      return `
-        <div class="person-card">
-          <label class="photo-box" title="คลิกเพื่อเลือกรูปหรือถ่ายภาพ">
-            ${photoHtml}
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              class="hidden"
-              onchange="handleImageUpload(event, '${person.id}')"
-            >
+            let html = '';
+            for (let i = 0; i < 5; i++) {
+                memberCount++;
+                const mId = 'm' + memberCount;
+                html += `
+        <div class="person-card relative mx-auto group w-[3.4cm]">
+          <label class="photo-box">
+            <div class="photo-placeholder" id="${mId}-div">อัปโหลดรูป<br>3x4 cm</div>
+            <img id="${mId}-img" class="hidden" src="">
+            <input type="file" accept="image/*" capture="environment" class="hidden" onchange="uploadPhoto(event, '${mId}')">
           </label>
-          <div class="person-text">
-            <div class="person-name">${escapeHtml(person.name)}</div>
-            <div class="person-nickname">${escapeHtml(person.nickname)}</div>
-            <div class="person-role">${escapeHtml(person.role)}</div>
-            ${phoneLine}
-            ${studentIdLine}
-            ${classLine}
+          <div class="mt-1 font-semibold text-[11px] text-gray-700">สมาชิกชุมนุม</div>
+          <input type="text" class="info-input font-bold" placeholder="ชื่อ-นามสกุล">
+          <div class="flex gap-0 w-full">
+            <input type="text" class="info-input flex-1" placeholder="รหัสนักเรียน">
+            <input type="text" class="info-input w-8 text-center" placeholder="ห้อง">
           </div>
         </div>
-      `;
-    }
+       `;
+            }
 
-    function createMemberRow(cards) {
-      return `
-        <div class="members-grid-5">
-          ${cards.map(card => createPersonCard(card)).join('')}
-        </div>
-      `;
-    }
-
-    function createTeacherForm(person, sectionKey, index) {
-      const targetRef = `${sectionKey}.${index}`;
-      return `
-        <div class="form-card">
-          <div class="flex items-start gap-3">
-            <label class="photo-box shrink-0">
-              ${
-                person.photo
-                  ? `<img src="${person.photo}" alt="">`
-                  : `<div class="photo-placeholder">คลิกเลือกรูป<br>หรือถ่ายภาพ</div>`
-              }
-              <input
-                type="file"
-                accept="image/*"
-                capture="environment"
-                class="hidden"
-                onchange="handleImageUpload(event, '${person.id}')"
-              >
-            </label>
-
-            <div class="flex-1 grid grid-cols-1 gap-2">
-              <input
-                type="text"
-                class="soft-input"
-                placeholder="ชื่อ-สกุล"
-                value="${escapeHtml(person.name)}"
-                oninput="updateField('${targetRef}', 'name', this.value)"
-              />
-              <input
-                type="text"
-                class="soft-input"
-                placeholder="ชื่อเล่น"
-                value="${escapeHtml(person.nickname)}"
-                oninput="updateField('${targetRef}', 'nickname', this.value)"
-              />
-              <input
-                type="text"
-                class="soft-input"
-                placeholder="เบอร์โทรศัพท์"
-                value="${escapeHtml(person.phone || '')}"
-                oninput="updateField('${targetRef}', 'phone', this.value)"
-              />
-              <input
-                type="text"
-                class="soft-input readonly"
-                value="${escapeHtml(person.role)}"
-                readonly
-              />
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    function createStudentForm(person, sectionKey, index = null, removable = false) {
-      const targetRef = index === null ? sectionKey : `${sectionKey}.${index}`;
-      return `
-        <div class="form-card">
-          <div class="flex items-start gap-3">
-            <label class="photo-box shrink-0">
-              ${
-                person.photo
-                  ? `<img src="${person.photo}" alt="">`
-                  : `<div class="photo-placeholder">คลิกเลือกรูป<br>หรือถ่ายภาพ</div>`
-              }
-              <input
-                type="file"
-                accept="image/*"
-                capture="environment"
-                class="hidden"
-                onchange="handleImageUpload(event, '${person.id}')"
-              >
-            </label>
-
-            <div class="flex-1 grid grid-cols-1 gap-2">
-              <input
-                type="text"
-                class="soft-input"
-                placeholder="รหัสประจำตัวนักเรียน"
-                value="${escapeHtml(person.studentId || '')}"
-                oninput="updateField('${targetRef}', 'studentId', this.value)"
-              />
-              <input
-                type="text"
-                class="soft-input"
-                placeholder="ชื่อ-สกุล"
-                value="${escapeHtml(person.name)}"
-                oninput="updateField('${targetRef}', 'name', this.value)"
-              />
-              <input
-                type="text"
-                class="soft-input"
-                placeholder="ชื่อเล่น"
-                value="${escapeHtml(person.nickname)}"
-                oninput="updateField('${targetRef}', 'nickname', this.value)"
-              />
-              <select
-                class="soft-select"
-                onchange="updateField('${targetRef}', 'classRoom', this.value)"
-              >
-                ${buildClassOptions(person.classRoom || '')}
-              </select>
-              <input
-                type="text"
-                class="soft-input readonly"
-                value="${escapeHtml(person.role)}"
-                readonly
-              />
-            </div>
-          </div>
-
-          ${
-            removable
-              ? `<div class="text-right mt-3">
-                  <button type="button" onclick="removeMember('${person.id}')" class="btn btn-danger">
-                    ลบสมาชิก
-                  </button>
-                </div>`
-              : ''
-          }
-        </div>
-      `;
-    }
-
-    function updateField(path, field, value) {
-      if (path.includes('.')) {
-        const [key, indexStr] = path.split('.');
-        const index = Number(indexStr);
-        state[key][index][field] = value;
-      } else {
-        state[path][field] = value;
-      }
-      renderPreview();
-    }
-
-    function handleImageUpload(event, personId) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const person = findPersonById(personId);
-        if (person) {
-          person.photo = e.target.result;
-          renderForms();
-          renderPreview();
+            container.insertAdjacentHTML('beforeend', html);
         }
-      };
-      reader.readAsDataURL(file);
-    }
 
-    function addMember() {
-      state.members.push({
-        id: uid(),
-        studentId: '',
-        name: '',
-        nickname: '',
-        classRoom: '',
-        role: 'สมาชิก',
-        photo: '',
-      });
-      renderForms();
-      renderPreview();
-    }
+        window.onload = () => {
+            addMembersRow();
 
-    function removeMember(memberId) {
-      state.members = state.members.filter(m => m.id !== memberId);
-      renderForms();
-      renderPreview();
-    }
+            // Ensure dynamically generated or print inputs capture text
+            document.addEventListener('input', function (e) {
+                if (e.target.tagName.toLowerCase() === 'input') {
+                    e.target.setAttribute('value', e.target.value);
+                }
+            });
+        };
+    </script>
 
-    function resetAll() {
-      if (!confirm('ยืนยันการล้างข้อมูลทั้งหมด?')) return;
-
-      state.clubName = '';
-      state.clubLocation = '';
-      state.teachers = [
-        { id: uid(), name: '', nickname: '', phone: '', role: 'ครูที่ปรึกษา', photo: '' },
-        { id: uid(), name: '', nickname: '', phone: '', role: 'ครูที่ปรึกษา', photo: '' },
-        { id: uid(), name: '', nickname: '', phone: '', role: 'ครูที่ปรึกษา', photo: '' },
-      ];
-      state.president = { id: uid(), studentId: '', name: '', nickname: '', classRoom: '', role: 'ประธานชุมนุม', photo: '' };
-      state.vicePresident = { id: uid(), studentId: '', name: '', nickname: '', classRoom: '', role: 'รองประธานชุมนุม', photo: '' };
-      state.members = Array.from({ length: 10 }, () => ({
-        id: uid(),
-        studentId: '',
-        name: '',
-        nickname: '',
-        classRoom: '',
-        role: 'สมาชิก',
-        photo: '',
-      }));
-
-      document.getElementById('clubNameInput').value = '';
-      document.getElementById('clubLocationInput').value = '';
-
-      renderForms();
-      renderPreview();
-    }
-
-    async function exportPNG() {
-      const pages = document.querySelectorAll('.a4-page');
-
-      for (let i = 0; i < pages.length; i++) {
-        const canvas = await html2canvas(pages[i], {
-          scale: 2,
-          useCORS: true,
-          backgroundColor: '#ffffff'
-        });
-
-        const link = document.createElement('a');
-        const pageNo = i + 1;
-        const safeName = state.clubName ? `ทะเบียนสมาชิกชุมนุม_${state.clubName}` : 'ทะเบียนสมาชิกชุมนุม';
-        link.download = `${safeName}_page_${pageNo}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-      }
-    }
-
-    function renderForms() {
-      document.getElementById('teachersForm').innerHTML = state.teachers
-        .map((teacher, index) => createTeacherForm(teacher, 'teachers', index))
-        .join('');
-
-      document.getElementById('presidentForm').innerHTML =
-        createStudentForm(state.president, 'president');
-
-      document.getElementById('vicePresidentForm').innerHTML =
-        createStudentForm(state.vicePresident, 'vicePresident');
-
-      document.getElementById('membersForm').innerHTML = state.members
-        .map((member, index) => createStudentForm(member, 'members', index, true))
-        .join('');
-    }
-
-    function buildMainPage(firstPageMembers) {
-      const memberRows = chunkArray(firstPageMembers, MEMBERS_PER_ROW);
-
-      return `
-        <div class="a4-page shadow-xl page-break">
-          <div class="text-center mb-4">
-            <img class="logo-head" src="${SCHOOL_LOGO_SRC}" alt="โลโก้โรงเรียน">
-
-            <div class="text-[20px] font-bold leading-tight">
-              ทะเบียนสมาชิกชุมนุม ${escapeHtml(state.clubName || '(ชื่อชุมนุม)')}
-            </div>
-
-            <div class="text-[16px] font-semibold leading-tight mt-1">
-              งานกิจกรรมพัฒนาผู้เรียน โรงเรียนชลบุรี "สุขบท"
-            </div>
-
-            <div class="text-[14px] mt-1">
-              สถานที่จัดชุมนุม: ${escapeHtml(state.clubLocation || '....................................')}
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <div class="flex justify-center gap-4 flex-wrap">
-              ${state.teachers.map(t => createPersonCard(t)).join('')}
-            </div>
-          </div>
-
-          <div class="connector h-4"></div>
-
-          <div class="mb-3">
-            <div class="flex justify-center">
-              ${createPersonCard(state.president)}
-            </div>
-          </div>
-
-          <div class="connector h-4"></div>
-
-          <div class="mb-4">
-            <div class="flex justify-center">
-              ${createPersonCard(state.vicePresident)}
-            </div>
-          </div>
-
-          <div class="mt-2">
-            <div class="text-center text-[13px] font-semibold mb-3">สมาชิกชุมนุม</div>
-            <div class="space-y-5">
-              ${memberRows.map(row => createMemberRow(row)).join('')}
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    function buildMemberOnlyPage(members, isNotLastPage) {
-      const rows = chunkArray(members, MEMBERS_PER_ROW);
-
-      return `
-        <div class="a4-page shadow-xl ${isNotLastPage ? 'page-break' : ''}">
-          <div class="text-center mb-4">
-            <img class="logo-head" src="${SCHOOL_LOGO_SRC}" alt="โลโก้โรงเรียน">
-
-            <div class="sub-page-title">
-              ทะเบียนสมาชิกชุมนุม ${escapeHtml(state.clubName || '(ชื่อชุมนุม)')}
-            </div>
-
-            <div class="sub-page-subtitle">
-              สมาชิกชุมนุม (หน้าต่อ)
-            </div>
-          </div>
-
-          <div class="space-y-5">
-            ${rows.map(row => createMemberRow(row)).join('')}
-          </div>
-        </div>
-      `;
-    }
-
-    function renderPreview() {
-      const firstPageMembers = state.members.slice(0, FIRST_PAGE_MEMBER_LIMIT);
-      const remainingMembers = state.members.slice(FIRST_PAGE_MEMBER_LIMIT);
-      const nextPages = chunkArray(remainingMembers, NEXT_PAGE_MEMBER_LIMIT);
-
-      let html = buildMainPage(firstPageMembers);
-
-      nextPages.forEach((group, index) => {
-        const isNotLast = index < nextPages.length - 1;
-        html += buildMemberOnlyPage(group, isNotLast);
-      });
-
-      document.getElementById('printArea').innerHTML = html;
-    }
-
-    document.getElementById('clubNameInput').addEventListener('input', function() {
-      state.clubName = this.value;
-      renderPreview();
-    });
-
-    document.getElementById('clubLocationInput').addEventListener('input', function() {
-      state.clubLocation = this.value;
-      renderPreview();
-    });
-
-    document.getElementById('addMemberBtn').addEventListener('click', addMember);
-    document.getElementById('printBtn').addEventListener('click', () => window.print());
-    document.getElementById('resetBtn').addEventListener('click', resetAll);
-    document.getElementById('exportPngBtn').addEventListener('click', exportPNG);
-
-    renderForms();
-    renderPreview();
-  </script>
 </body>
+
 </html>
